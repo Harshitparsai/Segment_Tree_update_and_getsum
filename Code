@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+using namespace std;
+long long getMid(long long s, long long e) 
+{ return s + (e -s)/2; }
+long long getSumUtil(long long *st, long long ss, long long se, long long qs, long long qe, long long si)
+{
+    if(qs <= ss && qe >= se)
+        return st[si];
+    if (se < qs || ss > qe)  
+        return 0;  
+    long long mid = getMid(ss, se);  
+    return getSumUtil(st, ss, mid, qs, qe, 2*si+1) +  
+    getSumUtil(st, mid+1, se, qs, qe, 2*si+2);  
+}
+void updateValueUtil(long long *st, long long ss, long long se, long long i, long long diff, long long si)
+{
+    if (i < ss || i > se)
+            return;
+    st[si] = st[si] + diff;  
+    if (se != ss)
+    {   long long mid = getMid(ss, se);  
+        updateValueUtil(st, ss, mid, i, diff, 2*si + 1);  
+        updateValueUtil(st, mid+1, se, i, diff, 2*si + 2);  
+    }  
+}
+void updateValue(long long arr[], long long *st, long long n, long long i, long long new_val)
+{
+    if (i < 0 || i > n-1)
+    {
+        return;
+    }
+    long long diff = new_val - arr[i];  
+    arr[i] = new_val;  
+    updateValueUtil(st, 0, n-1, i, diff, 0);  
+}
+long long getSum(long long *st, long long n, long long qs, long long qe)
+{
+    if (qs < 0 || qe > n-1 || qs > qe)
+    {
+        
+        return -1;
+    }
+
+    return getSumUtil(st, 0, n-1, qs, qe, 0);  
+}
+long long constructSTUtil(long long arr[], long long ss, long long se, long long *st, long long si)
+{
+    if (ss == se)
+    {
+        st[si] = arr[ss];
+        return arr[ss];
+    }
+    long long mid = getMid(ss, se);  
+    st[si] = constructSTUtil(arr, ss, mid, st, si*2+1) +  constructSTUtil(arr, mid+1, se, st, si*2+2);  
+    return st[si];  
+}
+long long *constructST(long long arr[], long long n)
+{
+    long long *st = new long long[4*n];  
+    constructSTUtil(arr, 0, n-1, st, 0);  
+    return st;  
+}
+int main()
+{   long long t,n,q;
+    cin>>t;
+    while(t--)
+    {
+        cin>>n>>q;
+        long long arr[n];
+        for(long long i=0;i<n;i++)
+        {
+            cin>>arr[i];
+        }
+        long long *st=constructST(arr,n);
+        char c;
+        long long qs,qe;
+        for(long long i=0;i<q;i++)
+        {
+            cin>>c>>qs>>qe;
+            if(c=='G')
+            {
+                cout<<getSum(st, n, qs, qe)<<endl;
+            }
+            else{
+                    updateValue(arr, st, n, qs, qe);  
+                
+            }
+        }
+    }
+}
